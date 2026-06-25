@@ -1,133 +1,212 @@
 # Urban Heat Mitigation and Cooling Strategy Optimization
-### Chhatrapati Sambhajinagar (Aurangabad), Maharashtra, India
 
-A geospatial machine-learning framework that predicts land surface temperature from satellite-derived indicators, validates the physical drivers of urban heat, and ranks city zones by where targeted cooling interventions deliver the greatest impact, measured both in degrees of cooling and in people protected.
+**Study Area:** Chhatrapati Sambhajinagar (Aurangabad), Maharashtra, India
+**Hackathon:** Bharatiya Antariksh Hackathon 2026
+**Problem Statement:** PS-01 — Optimizing Urban Heat Mitigation and Cooling Strategies via AI/ML
+**Team:** AstroByte
 
-Built for the **Bharatiya Antariksh Hackathon 2026 (ISRO)**, Problem Statement 01: *Optimizing Urban Heat Mitigation and Cooling Strategies via AI/ML*.
+A geospatial machine-learning decision-support framework for identifying urban heat-stress hotspots, predicting land surface temperature (LST), analysing the physical drivers of urban heat, estimating population-aware vulnerability, and prioritising cooling interventions across Chhatrapati Sambhajinagar.
 
----
+The system integrates satellite-derived environmental indicators with explainable machine learning to support location-specific urban heat mitigation planning.
 
-## What it does
+## Live Dashboard
 
-Most urban-heat projects stop at detection. This one closes the loop to optimization:
+Deployed Streamlit application:
 
-1. Predicts Land Surface Temperature (LST) across the city from physical drivers.
-2. Validates that the model learned real urban-climate physics, not spurious correlations, using SHAP.
-3. Simulates mitigation interventions (urban greening, cool and permeable surfaces) across every zone.
-4. Ranks zones by cooling potential, identifying where intervention reduces temperature the most.
-5. Computes a Heat Vulnerability Index (heat hazard combined with population exposure) to find where heat affects the most people.
-6. Produces interactive maps a municipal planner can act on directly.
+https://urban-heat-stress-hotspot-detection-tyvthux6ftbspircbb7bhw.streamlit.app/
 
----
+The dashboard provides interactive views of urban heat hotspots, heat drivers, vulnerability, intervention scenarios, model validation, and priority zones.
 
-## Quick start
+## Project Objective
 
-```bash
-pip install -r requirements.txt
+The project addresses urban heat as a planning and decision-support problem rather than only a mapping problem.
+
+It is designed to:
+
+* Predict land surface temperature across the study area using satellite-derived physical indicators.
+* Detect and rank urban heat-stress hotspots.
+* Identify the dominant environmental and urban drivers of predicted heat.
+* Estimate heat vulnerability by combining heat hazard with population exposure.
+* Simulate cooling interventions across city zones.
+* Recommend the most suitable cooling strategy for each location.
+* Provide an interactive dashboard for planners, researchers, and decision-makers.
+
+## Decision-Support Workflow
+
+```text
+Satellite Data and Geospatial Layers
+                |
+                v
+Feature Engineering
+(NDVI, NDBI, Elevation, Population, Land Cover)
+                |
+                v
+LST Prediction using Machine Learning
+                |
+                v
+Spatial Cross-Validation and Model Selection
+                |
+                v
+SHAP-Based Explainability
+                |
+                v
+Heat Hotspot and Vulnerability Analysis
+                |
+                v
+Scenario-Based Cooling Intervention Simulation
+                |
+                v
+Priority Zone Ranking and Interactive Dashboard
 ```
 
-Run the notebooks in `notebooks/` in order, or jump to the parts you need:
+## Key Capabilities
 
-| Notebook | Purpose |
-|---|---|
-| `01`–`04` | Data audit, cleaning, EDA, feature engineering |
-| `09_random_forest`, `10_xgboost` | LST models with spatial cross-validation |
-| `07_explainable_ai` | SHAP physics validation |
-| `08_scenario_simulation` | City-wide intervention simulation and zone priority ranking |
-| `11_heatmap` | Interactive LST thermal map |
-| `12_vulnerability` | Heat Vulnerability Index map |
+Unlike a conventional urban heat map, the framework supports the full workflow from detection to intervention prioritisation.
 
-All maps and reports are written to `outputs/`. Open the generated HTML files in any browser.
+* Predicts land surface temperature from physical urban and environmental indicators.
+* Uses spatial block cross-validation to reduce spatial leakage during model evaluation.
+* Uses SHAP analysis to validate whether the model captures meaningful urban-climate relationships.
+* Simulates urban greening and cool/permeable-surface scenarios.
+* Estimates predicted LST change for each intervention scenario.
+* Identifies high-priority heat hotspots.
+* Computes a Heat Vulnerability Index using heat hazard and population exposure.
+* Produces interactive maps, priority tables, reports, and a deployed decision-support dashboard.
 
----
+## Study Area
+
+The study focuses on Chhatrapati Sambhajinagar, formerly Aurangabad, Maharashtra, India.
+
+The city experiences increasing urbanisation, built-up expansion, vegetation loss, and heat-stress exposure. These conditions make it suitable for evaluating satellite-driven urban heat mitigation strategies.
+
+## Data Sources and Features
+
+| Parameter                | Dataset                           | Spatial Resolution | Purpose                                             |
+| ------------------------ | --------------------------------- | -----------------: | --------------------------------------------------- |
+| NDVI                     | Sentinel-2 SR Harmonized          |               10 m | Vegetation density and cooling influence            |
+| NDBI                     | Sentinel-2 SR Harmonized          |            10–20 m | Built-up intensity and impervious-surface influence |
+| Land Surface Temperature | Landsat 8/9 Collection 2 Level 2  |               30 m | Urban surface heat and hotspot detection            |
+| Elevation                | SRTM                              |               30 m | Terrain-related influence on heat distribution      |
+| Population               | WorldPop India 2020               |              100 m | Population exposure and vulnerability estimation    |
+| Land Cover               | Derived geospatial classification |           Variable | Urban surface characterisation                      |
+
+The working dataset contains approximately 9,900 sampled locations across the study area.
 
 ## Methodology
 
-### Data and features
+### Feature Engineering
 
-Satellite-derived indicators for Chhatrapati Sambhajinagar (about 9,900 sampled points): NDVI (vegetation), NDBI (built-up), Elevation, Population, and LST (target).
+The machine-learning model uses the following physical and urban drivers:
 
-> Specify your LST source here, for example Landsat-8 thermal or MODIS, exported via Google Earth Engine.
+* NDVI
+* NDBI
+* Elevation
+* Population
+* Land-cover information
 
-The model uses only physical drivers (NDVI, NDBI, Elevation, Population). Latitude and longitude are deliberately **excluded** from prediction and used only for spatial grouping and mapping. Including coordinates would let the model memorize *where* is hot instead of *why*, which inflates accuracy and, more importantly, prevents the model from responding correctly when an intervention changes land cover.
+Latitude and longitude are excluded from the model input features. They are used only for spatial grouping, mapping, and visualization.
 
-### Model and validation
+Excluding coordinates prevents the model from memorising locations instead of learning the physical reasons behind urban heat. This improves the credibility of scenario simulations when land-cover conditions are modified.
 
-- Models: Linear Regression (baseline), Random Forest, and XGBoost (selected).
-- **Spatial block cross-validation.** The city is divided into a grid and whole blocks are held out for testing, so spatially adjacent points cannot leak information between train and test. This is the standard pitfall in geospatial ML and the reason a naive random split over-reports accuracy.
-- Honest performance (XGBoost, spatial CV): **R² approximately 0.51, MAE approximately 1.78 C, RMSE approximately 2.26 C.** This is a deliberately conservative, leakage-free estimate that prioritizes transferability and correct intervention response over an inflated in-sample score.
+### Machine-Learning Models
 
-### Explainability and physics validation
+The project evaluates:
 
-SHAP analysis confirms the model learned correct urban-climate physics:
+* Linear Regression as a baseline model
+* Random Forest Regressor
+* XGBoost Regressor
 
-- **NDBI** (built-up index) is the dominant driver, with a cleanly monotonic positive relationship to LST. More impervious surface, more heat.
-- **NDVI** (vegetation) reduces temperature in the vegetated range, and the model correctly separates water bodies (negative NDVI, cool) from sparse-vegetation built-up land.
-- Sanity check: a simulated 20 percent increase in vegetation reduces predicted LST by about 0.34 C on average, confirming interventions move temperature in the physically correct direction.
+XGBoost is selected as the primary model based on predictive performance and suitability for nonlinear relationships between satellite-derived indicators and land surface temperature.
 
-### Mitigation simulation and zone prioritization
+### Spatial Cross-Validation
 
-Two interventions are simulated across every zone:
+Spatial block cross-validation is used instead of a random train-test split.
 
-- **Urban greening:** increased vegetation and reduced built-up surface.
-- **Cool and permeable surfaces:** reduced built-up signal (cool roofs, permeable paving).
+The study area is divided into spatial blocks, and complete blocks are held out for testing. This reduces the risk of spatial leakage, where nearby observations in training and testing data can produce overly optimistic performance estimates.
 
-Each zone is scored by the cooling it achieves and assigned its best-performing strategy. The hottest zones are then ranked into an intervention priority list. Targeted greening of the top hotspot zones delivers up to about **0.84 C of surface cooling**, concentrated where heat is highest.
+### Explainable AI
 
-### Heat Vulnerability Index
+SHAP analysis is used to interpret model behaviour and evaluate the contribution of each feature to predicted land surface temperature.
 
-Cooling potential alone directs resources to the hottest zones, which are often sparsely populated peripheral areas. The Heat Vulnerability Index combines heat hazard with population exposure to find where heat affects the most people.
+The analysis supports the following physical interpretation:
 
-The result is a key planning insight: **the hottest zones and the most at-risk zones are largely different.** A moderately hot but densely populated zone can carry higher human risk than the single hottest zone in the city.
+* Higher built-up intensity is associated with increased predicted LST.
+* Vegetation-related features contribute to cooling in vegetated areas.
+* The model distinguishes between built-up surfaces, sparse vegetation, and cooler surface conditions.
+* Feature contributions are used to support transparent planning decisions.
 
----
+## Cooling Intervention Scenarios
 
-## Key results
+Two scenario-based interventions are simulated across the study area.
 
-| Output | Result |
-|---|---|
-| LST model (XGBoost, spatial CV) | R² approx 0.51, MAE approx 1.78 C |
-| Dominant heat driver (SHAP) | NDBI (built-up surface) |
-| Best cooling per zone | up to approx 0.84 C (targeted greening) |
-| Hotspot zones identified | top 10 of 96 grid zones |
-| Vulnerability finding | most at-risk zones differ from hottest zones |
+### Urban Greening Scenario
 
-Generated outputs:
+This scenario represents an increase in vegetation cover and a corresponding reduction in built-up influence.
 
-- `outputs/aurangabad_heat_map.html` — gridded LST thermal map with priority-zone markers.
-- `outputs/aurangabad_vulnerability_map.html` — Heat Vulnerability Index map.
-- `outputs/reports/intervention_priority.csv` — ranked intervention plan.
-- `outputs/reports/zone_vulnerability.csv` — zones ranked by human risk.
+The dashboard reports the predicted LST change associated with a simulated increase in green cover.
 
----
+### Cool and Permeable Surface Scenario
 
-## Data sources and ISRO alignment
+This scenario represents reduced built-up heat influence through interventions such as:
 
-**Current prototype:** satellite-derived indicators exported via Google Earth Engine.
+* Cool roofs
+* Reflective surfaces
+* Permeable pavements
+* Low-heat urban materials
 
-**Designed for Indian Earth-observation data:**
+Each location is assigned the intervention scenario with the highest predicted cooling benefit.
 
-- **Bhuvan (ISRO / NRSC geoportal):** Land Use / Land Cover and Urban Land Use thematic layers for land-cover validation and refinement.
-- **NRSC LULC Atlas of India** and **NICES** Essential Climate Variables for contextual and temporal layers.
-- **MOSDAC (INSAT-3D / 3DR):** meteorological context.
+## Heat Vulnerability Index
 
-**TRISHNA-ready.** The pipeline is built around thermal-infrared LST as its target, so it is positioned to ingest data from TRISHNA, the upcoming ISRO and CNES thermal-infrared mission (approximately 50 to 60 m resolution, designed for urban-environment monitoring), enabling substantially higher-resolution, India-wide deployment.
+The Heat Vulnerability Index combines:
 
----
+* Predicted heat hazard
+* Population exposure
 
-## Technology stack
+This approach distinguishes between the hottest locations and the locations where heat may affect the greatest number of people.
 
-Python, pandas, NumPy, scikit-learn, XGBoost, SHAP, folium, branca, matplotlib. Data engineering via Google Earth Engine.
+A moderately hot but densely populated zone may have greater planning priority than an isolated high-temperature zone with low population exposure.
 
----
+## Key Results
 
-## Repository structure
+| Output                               | Result                                              |
+| ------------------------------------ | --------------------------------------------------- |
+| Selected model                       | XGBoost Regressor                                   |
+| Validation approach                  | Spatial block cross-validation                      |
+| XGBoost performance                  | R² approximately 0.51                               |
+| Mean Absolute Error                  | Approximately 1.78 °C                               |
+| Root Mean Squared Error              | Approximately 2.26 °C                               |
+| Dominant heat driver                 | Built-up intensity represented by NDBI              |
+| Maximum zone-level cooling potential | Up to approximately 0.84 °C under targeted greening |
+| Hotspot prioritisation               | Top 10 priority zones identified from 96 grid zones |
+| Vulnerability finding                | High-risk zones differ from the hottest zones       |
+
+## Decision-Support Interpretation
+
+The project is designed to answer four planning questions:
+
+1. Where are the major urban heat-stress hotspots?
+2. Which physical factors are contributing to heat in those locations?
+3. Which locations have the highest population-aware heat vulnerability?
+4. Which cooling intervention is likely to provide the greatest predicted benefit in each location?
+
+## Generated Outputs
+
+| Output                                      | Description                                                    |
+| ------------------------------------------- | -------------------------------------------------------------- |
+| `outputs/aurangabad_heat_map.html`          | Interactive gridded LST thermal map with priority-zone markers |
+| `outputs/aurangabad_vulnerability_map.html` | Heat Vulnerability Index map                                   |
+| `outputs/reports/intervention_priority.csv` | Ranked intervention priority plan                              |
+| `outputs/reports/zone_vulnerability.csv`    | Population-aware vulnerability ranking                         |
+| `outputs/dashboard_data/`                   | CSV files used by the Streamlit dashboard                      |
+| `outputs/plots/`                            | Model and explainability visualisations                        |
+
+## Repository Structure
 
 ```text
 .
 ├── data/
-│   ├── raw/                 # source satellite-derived dataset
-│   └── processed/           # cleaned and feature-engineered data
+│   ├── raw/                         # Source satellite-derived data
+│   └── processed/                   # Cleaned and feature-engineered datasets
 ├── notebooks/
 │   ├── 01_data_audit.ipynb
 │   ├── 02_data_cleaning.ipynb
@@ -139,29 +218,93 @@ Python, pandas, NumPy, scikit-learn, XGBoost, SHAP, folium, branca, matplotlib. 
 │   ├── 09_random_forest.ipynb
 │   ├── 10_xgboost.ipynb
 │   ├── 11_heatmap.ipynb
-│   └── 12_vulnerability.ipynb
+│   ├── 12_vulnerability.ipynb
+│   └── 13_dashboard_data_preparation.ipynb
 ├── outputs/
-│   ├── reports/             # priority and vulnerability CSVs
-│   ├── *.pkl                # trained models
-│   └── *.html               # interactive maps
-├── src/                     # reusable cleaning, feature, and model code
-├── README.md
-└── requirements.txt
+│   ├── dashboard_data/              # Dashboard-ready CSV files
+│   ├── plots/                       # Visualisations
+│   ├── reports/                     # Priority and vulnerability reports
+│   ├── *.pkl                        # Trained models
+│   └── *.html                       # Interactive maps
+├── src/                             # Reusable processing and utility modules
+├── app.py                           # Streamlit dashboard application
+├── requirements.txt
+└── README.md
 ```
 
----
+## Installation and Local Execution
 
-## Roadmap
+Clone the repository:
 
-- Integrate Bhuvan LULC for land-cover-aware modeling.
-- Add socioeconomic vulnerability layers (age, income from Census) to the Heat Vulnerability Index.
-- Ingest TRISHNA thermal data for high-resolution, multi-city deployment.
-- Streamlit dashboard for interactive planner use.
+```bash
+git clone https://github.com/priyaldeshmukh2005/urban-heat-stress-hotspot-detection.git
+cd urban-heat-stress-hotspot-detection
+```
 
----
+Install dependencies:
 
-## Team
+```bash
+pip install -r requirements.txt
+```
 
-> team members and roles.
+Run the notebook workflow in sequence to reproduce the analysis and generated outputs.
 
-Bharatiya Antariksh Hackathon 2026, Problem Statement 01.
+To launch the Streamlit dashboard locally:
+
+```bash
+python -m streamlit run app.py
+```
+
+## Technology Stack
+
+* Python
+* Pandas
+* NumPy
+* Scikit-learn
+* XGBoost
+* SHAP
+* Plotly
+* Folium
+* Matplotlib
+* Streamlit
+* Google Earth Engine
+* QGIS
+
+## ISRO and Indian Earth-Observation Alignment
+
+The framework is designed to support Indian Earth-observation applications and can be extended using national geospatial and climate datasets.
+
+Potential future integrations include:
+
+* Bhuvan and NRSC Land Use/Land Cover layers for refined land-cover validation.
+* NRSC LULC Atlas of India and NICES Essential Climate Variables.
+* MOSDAC meteorological datasets for atmospheric and climate context.
+* TRISHNA thermal-infrared data for higher-resolution urban thermal monitoring and multi-city deployment.
+
+## Limitations
+
+* Satellite-derived land surface temperature is not identical to near-surface air temperature.
+* Population is used as an exposure proxy and does not represent all social vulnerability dimensions.
+* Cooling values are model-based scenario estimates and are not guaranteed real-world temperature outcomes.
+* Final intervention planning requires field validation, local engineering assessment, land-availability checks, cost analysis, and municipal feasibility review.
+
+## Future Scope
+
+* Integrate Bhuvan and NRSC land-cover datasets for improved land-cover-aware modelling.
+* Add socioeconomic vulnerability indicators such as age, income, housing quality, and health-risk proxies.
+* Incorporate weather-station observations for additional validation.
+* Integrate TRISHNA thermal data for higher-resolution urban heat analysis.
+* Extend the framework to additional Indian cities.
+* Add intervention cost, feasibility, and implementation-priority scoring.
+
+## Team AstroByte
+
+| Team Member      | Role                                       |
+| ---------------- | ------------------------------------------ |
+| Srushti Bawaskar | Geospatial and Data Lead                   |
+| Priyal Deshmukh  | AI/ML Lead                                 |
+| Rishika Deshmukh | Research, Documentation and Dashboard Lead |
+
+## Acknowledgement
+
+Developed by Team AstroByte for the Bharatiya Antariksh Hackathon 2026, Problem Statement PS-01: Optimizing Urban Heat Mitigation and Cooling Strategies via AI/ML.
