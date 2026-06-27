@@ -505,11 +505,41 @@ def get_scenario_display_name(scenario_name):
 # SIDEBAR
 # ==================================================
 
-st.sidebar.markdown("## ☀️ UrbanHeat AI")
-st.sidebar.caption("Heat to Cool Strategy")
+st.sidebar.markdown(
+    """
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+        <span style="font-size:24px;">☀️</span>
+        <span style="color:white; font-size:20px; font-weight:800;">
+            UrbanHeat AI
+        </span>
+    </div>
+
+    <div style="
+        color:#f7d8cf;
+        font-size:14px;
+        margin-bottom:18px;
+    ">
+        AI Cooling Intervention Simulator
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("### Navigation")
+
+st.sidebar.markdown(
+    """
+    <div style="
+        color:white;
+        font-size:18px;
+        font-weight:700;
+        margin-bottom:8px;
+    ">
+        NAVIGATION
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 page = st.sidebar.radio(
     "Select dashboard section",
@@ -518,10 +548,10 @@ page = st.sidebar.radio(
         "Urban Heat Hotspots",
         "Heat Drivers",
         "Heat Vulnerability",
-        "Cooling Strategy",
+        "AI Cooling Intervention Simulator",
         "Model Validation",
-        "About Project"
-    ]
+        "About Project",
+    ],
 )
 
 st.sidebar.markdown(
@@ -540,25 +570,37 @@ st.sidebar.markdown(
         </div>
     </div>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("### Team AstroByte")
+
 st.sidebar.markdown(
     """
-    **Priyal Deshmukh**  
-    AI/ML Lead  
-
-    **Srushti Bawaskar**  
-    Geospatial & Data Lead  
-
-    **Rishika Deshmukh**  
-    Research, Documentation & Dashboard Lead
-    """
+    <div style="
+        color:white;
+        font-size:18px;
+        font-weight:700;
+        margin-bottom:8px;
+    ">
+        TEAM ASTROBYTE
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 
+st.sidebar.markdown(
+    """
+**Priyal Deshmukh**  
+AI/ML Lead  
 
+**Srushti Bawaskar**  
+Geospatial & Data Lead  
+
+**Rishika Deshmukh**  
+Research, Documentation & Dashboard Lead
+"""
+)
 # ==================================================
 # TOP HEADER
 # ==================================================
@@ -622,6 +664,7 @@ if page == "Project Overview":
     )
 
     st.markdown(
+    
         """
         <div class="section-panel">
             <div class="section-title">🧭 How to Use This Dashboard</div>
@@ -629,7 +672,7 @@ if page == "Project Overview":
                 <li><b>Locate heat stress:</b> use Urban Heat Hotspots to identify High and Very High heat zones.</li>
                 <li><b>Prioritize people at risk:</b> open Heat Vulnerability to find areas where heat overlaps with population exposure.</li>
                 <li><b>Understand why:</b> review Heat Drivers to see which variables most influence predicted land surface temperature.</li>
-                <li><b>Compare interventions:</b> use Cooling Strategy to compare +20% green cover and cool/permeable-surface scenarios.</li>
+                <li><b>Compare interventions:</b> use AI Cooling Intervention Simulator to compare +20% green cover and cool/permeable-surface scenarios.</li>
                 <li><b>Verify before implementation:</b> use priority-zone tables for field assessment, cost review, and municipal planning.</li>
             </ol>
         </div>
@@ -1101,10 +1144,10 @@ elif page == "Heat Vulnerability":
 
 
 # ==================================================
-# COOLING STRATEGY
+# AI Cooling Intervention Simulator
 # ==================================================
 
-elif page == "Cooling Strategy":
+elif page == "AI Cooling Intervention Simulator":
 
     st.header("🛰 AI Cooling Intervention Simulator")
 
@@ -2025,7 +2068,7 @@ to generate a real-time AI prediction using the trained XGBoost model.
         )
 
     # ==========================================================
-    # END OF COOLING STRATEGY
+    # END OF AI COOLING INTERVENTION SIMULATOR
     # ==========================================================
     
 # ==================================================
