@@ -1,10 +1,10 @@
 import os
 import joblib
-
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+from pathlib import Path
 
 # ==================================================
 # PAGE CONFIG
@@ -1105,9 +1105,10 @@ elif page == "Heat Vulnerability":
 # ==================================================
 
 elif page == "Cooling Strategy":
-        st.header("🛰 AI Cooling Intervention Simulator")
 
-        st.markdown(
+    st.header("🛰 AI Cooling Intervention Simulator")
+
+    st.markdown(
         """
         <div class="cool-note">
         This simulator performs <b>real-time AI prediction</b> using the trained
@@ -1118,9 +1119,9 @@ elif page == "Cooling Strategy":
         """,
         unsafe_allow_html=True,
     )
-    
-        MODEL_PATH = Path("outputs/models/xgboost_v3_landcover_model.pkl")
-        DATA_PATH = Path("data/processed/featured_uhi_v3.csv")
+
+    MODEL_PATH = Path("outputs/models/xgboost_v3_landcover_model.pkl")
+    DATA_PATH = Path("data/processed/featured_uhi_v3.csv")
 
     MODEL_FEATURES = [
         "NDVI",
@@ -1147,14 +1148,14 @@ elif page == "Cooling Strategy":
     model = load_ai_model()
 
     simulation_df = load_simulation_dataset().copy()
-
+        
     missing_features = [
         feature
         for feature in MODEL_FEATURES
         if feature not in simulation_df.columns
     ]
 
-    if len(missing_features) > 0:
+    if missing_features:
 
         st.error(
             "Required model features are missing:\n\n"
@@ -1186,6 +1187,7 @@ elif page == "Cooling Strategy":
             value=25,
             step=1,
         )
+        
 
         cool_roofs = st.slider(
             "🏠 Cool Roof Adoption (%)",
@@ -1237,41 +1239,37 @@ elif page == "Cooling Strategy":
         """
         )
 
-    st.markdown("---")
+        st.markdown("---")
 
-    def clip(series, low=None, high=None):
+        def clip(series, low=None, high=None):
 
-        if low is not None:
-            series = np.maximum(series, low)
+            if low is not None:
+                series = np.maximum(series, low)
 
-        if high is not None:
-            series = np.minimum(series, high)
+            if high is not None:
+                series = np.minimum(series, high)
 
-        return series
+            return series
 
-    def normalize_landcover(df):
+        def normalize_landcover(df):
 
-        cols = [
-            "LandCover_Bare_sparse_vegetation",
-            "LandCover_Built-up land",
-            "LandCover_Cropland",
-            "LandCover_Grassland",
-            "LandCover_Permanent_water_bodies",
-            "LandCover_Shrubland",
-            "LandCover_Tree cover",
-        ]
+            cols = [
+                "LandCover_Bare_sparse_vegetation",
+                "LandCover_Built-up land",
+                "LandCover_Cropland",
+                "LandCover_Grassland",
+                "LandCover_Permanent_water_bodies",
+                "LandCover_Shrubland",
+                "LandCover_Tree cover",
+            ]
 
-        total = df[cols].sum(axis=1)
+            total = df[cols].sum(axis=1)
 
-        total = total.replace(0, 1)
+            total = total.replace(0, 1)
 
-        df[cols] = df[cols].div(total, axis=0)
+            df[cols] = df[cols].div(total, axis=0)
 
-        return df
-
-    def apply_interventions(df):
-
-        simulated = df.copy()
+            return df
     def apply_interventions(df):
 
         simulated = df.copy()
@@ -1391,7 +1389,6 @@ elif page == "Cooling Strategy":
         simulated = normalize_landcover(simulated)
 
         return simulated
-
     # ==========================================================
     # HOTSPOT CLASSIFICATION
     # ==========================================================
@@ -1410,7 +1407,8 @@ elif page == "Cooling Strategy":
         elif lst >= 30:
             return "Moderate"
 
-        return "Low"
+        else:
+            return "Low"
 
     # ==========================================================
     # RUN AI SIMULATION
@@ -1600,7 +1598,7 @@ elif page == "Cooling Strategy":
         )
 
         st.markdown("---")
-                # ==========================================================
+        # ==========================================================
         # AI HOTSPOT MAP
         # ==========================================================
 
